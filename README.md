@@ -20,5 +20,4 @@ Voice warnings to sysadmin and generate log files.<br />
 
 ## Coming soon
 
-  - Deauthenticate who ARP spoof the LAN, if not you.
   - SSH, FTP and Scanners warnings.
