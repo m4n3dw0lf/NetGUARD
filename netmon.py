@@ -22,7 +22,7 @@ import logging
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 from scapy.all import *
 import os
-from jarvis import Jarvis
+from core.jarvis import Jarvis
 from datetime import datetime
 from modules.utils import *
 
