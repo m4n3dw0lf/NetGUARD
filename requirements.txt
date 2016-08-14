@@ -1,4 +1,3 @@
-git+git://github.com/kti/python-netfilterqueue
 scapy==2.3.2
 decorator==4.0.10
 praw==3.5.0
