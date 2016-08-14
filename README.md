@@ -10,15 +10,16 @@ Defend host, give voice warnings to sysadmin and generate log files.<br />
 ## Installation
 
  - git clone https://github.com/m4n3dw0lf/NetMON
- - cd NetMON && pip install -r requirements.txt
- - python netmon.py
+ - cd NetGUARD && pip install -r requirements.txt
+ - ./netguard.py
 
 ## Current Features
 
-  - Set static ARP with your gateway (Guardian)
-  - Someone ARP spoofing the gateway.(Monitor)
-  - You are ARP spoofing the gateway.(Monitor)
+  - Set static ARP with your gateway.               (Guardian)
+  - Report if someone is ARP spoofing the gateway.  (Monitor)
+  - Report if you are ARP spoofing the gateway.     (Monitor)
 
 ## Coming soon
 
   - SSH, FTP and Scanners warnings.
+  - Multiple access attempts block.
