@@ -145,6 +145,8 @@ class NetGUARD(object):
 			self.Jarvis.Say("Setting static arp with gateway.")
 			os.system("arp -s {} {}".format(self.gateway_ip, self.gateway_mac))
 			self.log("Static ARP set with gateway.")
+			
+			self.Jarvis.Say("I will warn you if i find any threat")
 
 				# Start the sniffer.
 			p = sniff(iface=self.interface, prn = self.main)
