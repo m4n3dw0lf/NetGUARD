@@ -1,7 +1,7 @@
-# NetMON
-Security Network Monitor<br/>
+# NetGUARD
+Network Guardian <br/>
 
-Voice warnings to sysadmin and generate log files.<br />
+Defend host, give voice warnings to sysadmin and generate log files.<br />
 
 ## Dependencies
 
@@ -13,10 +13,11 @@ Voice warnings to sysadmin and generate log files.<br />
  - cd NetMON && pip install -r requirements.txt
  - python netmon.py
 
-## Current Warnings
+## Current Features
 
-  - Someone ARP spoofing the gateway.
-  - You are ARP spoofing the gateway.
+  - Set static ARP with your gateway (Guardian)
+  - Someone ARP spoofing the gateway.(Monitor)
+  - You are ARP spoofing the gateway.(Monitor)
 
 ## Coming soon
 
