@@ -9,7 +9,7 @@ Defend host, give voice warnings to sysadmin and generate log files.<br />
 
 ## Installation
 
- - git clone https://github.com/m4n3dw0lf/NetMON
+ - git clone https://github.com/m4n3dw0lf/NetGUARD
  - cd NetGUARD && pip install -r requirements.txt
  - ./netguard.py
 
