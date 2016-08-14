@@ -5,7 +5,7 @@ Voice warnings to sysadmin and generate log files.<br />
 
 ## Dependencies
 
- - libasound-dev libjack-jackd2-dev portaudio19-dev python-pyaudio build-essential python-dev libnetfilter-queue-dev libespeak1 libffi-dev
+ - libasound-dev libjack-jackd2-dev portaudio19-dev python-pyaudio build-essential python-dev libespeak1 libffi-dev
 
 ## Installation
 
