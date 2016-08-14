@@ -26,11 +26,11 @@ from core.jarvis import Jarvis
 from datetime import datetime
 from modules.utils import *
 
-class NetMON(object):
+class NetGUARD(object):
 
-	name = "Network Monitor"
-	desc = "Jarvis warnings to sysadmin and log to txt file."
-	version = "0.1"
+	name = "Network Guardian"
+	desc = "Defend host, give warnings to sysadmin and log to txt file."
+	version = "0.2"
 
 	def __init__(self):
 
@@ -38,16 +38,20 @@ class NetMON(object):
 		self.Jarvis = Jarvis()
 
 			# Log file
-		self.file = open("log/NetMONlog.txt","a+")
+		self.file = open("log/NetGUARD.log","a+")
 
-			# Network Interface
-		self.interface = raw_input("[+] Enter the network interface: ")
+		try:
+				# Network Interface
+			self.interface = raw_input("[+] Enter the network interface: ")
 
-			# Gateway IP address
-		self.gateway_ip = raw_input("[+] Enter the gateway IP address: ")
+				# Gateway IP address
+			self.gateway_ip = raw_input("[+] Enter the gateway IP address: ")
 
-			# Gateway MAC address
-		self.gateway_mac = raw_input("[+] Enter the gateway MAC address: ")
+				# Gateway MAC address
+			self.gateway_mac = raw_input("[+] Enter the gateway MAC address: ")
+		except KeyboardInterrupt:
+			print "[!] User requested shutdown."
+			exit(0)
 
 			# My Network Interface MAC_Address
 		self.mymac = get_mymac(self.interface)
@@ -60,10 +64,6 @@ class NetMON(object):
 
 			# If someone is ARP spoofing
 		self.spoof_status = False
-
-		# Deauthenticate someone from LAN
-	#def kick(self, mac):
-		#self.log(" We deauthenticate the MAC: {} and kick him out of the LAN".format(mac))
 
 		# Main routine
 	def main(self, p):
@@ -92,9 +92,11 @@ class NetMON(object):
 				if protocol_src == self.gateway_ip and hardware_src == self.gateway_mac:
 					if self.spoof_status == True:
 						self.Jarvis.Say("The gateway has returned to the original MAC.")
+						self.log("Gateway returned to original MAC address.")
 						self.spoof_status = False
 					if self.myspoof_status == True:
-						self.Jarvis.Say("We stop to arp spoof the gateway sir.")
+						self.Jarvis.Say("You stopped to arp spoof the gateway sir.")
+						self.log("This host stop to ARP spoof the gateway. \n")
 						self.myspoof_status = False
 					return
 
@@ -106,7 +108,7 @@ class NetMON(object):
 
 
 						if self.myspoof_status == False:
-							self.Jarvis.Say("We are arp spoofing the gateway sir.")
+							self.Jarvis.Say("You are arp spoofing the gateway sir.")
 
 								# Log
 							self.log("This host start to ARP spoof the gateway. \n")
@@ -121,10 +123,6 @@ class NetMON(object):
 					else:
 						self.spoof_status = True
 						self.Jarvis.Say("Someone that is not us is trying to ARP spoof the gateway.")
-						self.Jarvis.Say("I will kick him out of the lan sir.")
-
-							#Deauthenticate attacker from LAN.
-						#self.kick(hardware_src)
 
 							# Log
 						self.log("{} are trying to ARP spoof the gateway. \n")
@@ -140,22 +138,31 @@ class NetMON(object):
 		# Start the sniffer
 	def start(self):
 		try:
+			self.Jarvis.Say("Network guardian initialized.")
+			self.log("NetGUARD started")
+
+				# Set static ARP with the gateway.
+			self.Jarvis.Say("Setting static arp with gateway.")
+			os.system("arp -s {} {}".format(self.gateway_ip, self.gateway_mac))
+			self.log("Static ARP set with gateway.")
+
+				# Start the sniffer.
 			p = sniff(iface=self.interface, prn = self.main)
-			self.log("NetMON started")
+
 		except Exception as e:
 			self.Jarvis.Say("Problem starting the network monitor")
 			self.log("Problem starting the network monitor")
 
-		# Start the sniffer as subprocess
+		# Start the sniffer as subprocess.
 	def backgroundstart(self):
 		try:
-			self.p = subprocess.Popen(["python netmon.py","NetMON"], shell=False)
-			self.log("NetMON in background started.")
+			self.p = subprocess.Popen(["python netguard.py","NetGUARD"], shell=False)
+			self.log("NetGUARD in background started.")
 		except Exception as e:
 			self.Jarvis.Say("Problem starting the network monitor in background")
-			self.log("Problem starting NetMON in background")
+			self.log("Problem starting NetGUARD in background")
 
 if __name__ == "__main__":
 
-	netmon = NetMON()
-	netmon.start()
+	netguard = NetGUARD()
+	netguard.start()
