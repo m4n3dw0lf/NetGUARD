@@ -33,12 +33,13 @@ root      6654 ... python core/NetGUARD.py
 
 ## Current Features
 
-  ### ARP Protection
+ ### ARP Protection
+  
   - Set static ARP with your gateway.                        (Guardian)
   - Report if someone is ARP spoofing the gateway.           (Monitor)
   - Report if you are ARP spoofing the gateway.              (Monitor)
 
-  ### SSH Protection
+ ### SSH Protection
   - Block SSH packets from IP after multiple failed attempts.(Guardian)
   - Report if someone open a socket with the SSH server.     (Monitor)
 
