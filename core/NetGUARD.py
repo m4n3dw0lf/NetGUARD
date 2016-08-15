@@ -247,11 +247,11 @@ class NetGUARD(object):
 							ssh_src = str(ip_src)
 							os.system("iptables -A INPUT -p tcp -s {} --dport ssh -j REJECT".format(ip_src))
 							self.Jarvis.Say("The IP {} is brute forcing the SSH server.".format(ssh_src))
-							self.Jarvis.Say("Rising packet shield from host.")
+							self.Jarvis.Say("Raising the packet shield for the attacker")
 
 								# Log
 							self.log("Someone is brute forcing the SSH server.")
-							self.log("Rising packet shield from host.")
+							self.log("Raising the packet shield for the attacker")
 							
 								# Status
 							self.ssh_count = 0
