@@ -229,7 +229,7 @@ class NetGUARD(object):
 	def backgroundstart(self):
 		try:
 			with open("log/NetGUARD.log","a+") as stdout:
-				self.p = subprocess.Popen(["python core/main.py"], shell=True, stdout=stdout, stderr=stdout)
+				self.p = subprocess.Popen(["python core/NetGUARD.py"], shell=True, stdout=stdout, stderr=stdout)
 			self.log("NetGUARD in background started.")
 			return
 		except Exception as e:
