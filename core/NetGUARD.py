@@ -62,7 +62,7 @@ class NetGUARD(object):
 
 	name = "Network Guardian"
 	desc = "Defend host, give warnings to sysadmin and log to txt file."
-	version = "0.3"
+	version = "0.5"
 
 
 	def __init__(self):
@@ -105,7 +105,15 @@ class NetGUARD(object):
 			# If someone is ARP spoofing
 		self.spoof_status = False
 
+			# SSH client attemps
+		self.ssh_count = 0
+		self.ssh_brute = False
 
+			# Time variables
+		self.t = ''
+		self.t1 = ''
+
+		# Configuration file mapping
 	def configmap(self, section):
 		dict = {}
 		options = self.config.options(section)
@@ -130,7 +138,8 @@ class NetGUARD(object):
 				# Media Acess Control source
 			mac_src = p[Ether].src
 
-			# ARP Layer
+
+			# ARP Layer Protection
 		if p.haslayer(ARP):
 
 				# is-at
@@ -192,6 +201,62 @@ class NetGUARD(object):
 						else:
 							return
 
+                        # IP Layer Protection
+                if p.haslayer(IP):
+			ip_src = p[IP].src
+			ip_dst = p[IP].dst
+			ip_chk = p[IP].chksum
+			ip_len = p[IP].len
+
+				# TCP Layer Protection
+			if p.haslayer(TCP) and p.haslayer(Raw):
+	                	flags = {'F':'FIN','S':'SYN','R':'RST','P':'PSH','A':'ACK','U':'URG','E':'ECE','C':'CWR'}
+	                        dport = p[TCP].dport
+	                        sport = p[TCP].sport
+	                        ack = p[TCP].ack
+	                        seq = p[TCP].seq
+	                        preflag = [flags[x] for x in p.sprintf('%TCP.flags%')]
+	                        flag = "/".join(preflag)
+	                        chksum = p[TCP].chksum
+	                        load = p[Raw].load
+
+				# SSH Protection
+				if "SSH" in load and ip_src != self.myip:
+
+					if self.ssh_brute == False:
+						self.Jarvis.Say("Someone open a socket with the SSH server.")
+						self.log("Someone open a socket with the SSH server.")
+
+					self.ssh_count +=1
+
+					if self.ssh_count == 1:
+							# Live minutes
+						self.t = datetime.now().strftime('%M')
+					else:
+						self.t2 = datetime.now().strftime('%M')
+
+						# If 4 ssh_client packets and 4º count time - 1º count time >= 1
+					if self.ssh_count >= 4 and int(self.t2) >= int(self.t):
+
+						interval = int(self.t2) - int(self.t)
+						if interval >= 20:
+							self.ssh_count = 0
+							self.t = 0
+						else:
+							self.ssh_brute = True
+							ssh_src = str(ip_src)
+							self.Jarvis.Say("The IP {} is brute forcing the SSH server.".format(ssh_src))
+							self.Jarvis.Say("Rising packet shield from host.")
+
+								# Log
+							self.log("Someone is brute forcing the SSH server.")
+							self.log("Rising packet shield from host.")
+
+							os.system("iptables -A INPUT -p tcp -s {} --dport ssh -j REJECT".format(ip_src))
+							self.ssh_count = 0
+							self.t = 0
+
+
 		# Logger
 	def log(self, message):
 		self.file.write("\n")
@@ -223,6 +288,7 @@ class NetGUARD(object):
 		except Exception as e:
 			self.Jarvis.Say("Problem starting the network monitor")
 			self.log("Problem starting the network monitor")
+			self.log("Exception: {}".format(e))
 
 
 		# Start the sniffer as subprocess.
