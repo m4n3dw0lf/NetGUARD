@@ -16,8 +16,6 @@ Defend host, give voice warnings to sysadmin and generate log files.<br />
 
   > NetGUARD will give voice warnings or you can check log at: log/NetGUARD.log
 
-  > Will generate a .pcap file when NetGUARD process finishes in NetGUARD main directory
-
 ## Current Features
 
   - Set static ARP with your gateway.               (Guardian)
