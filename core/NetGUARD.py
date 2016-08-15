@@ -56,7 +56,7 @@ def get_mymac(interface):
         return ''.join(['%02x:' % ord(char) for char in info[18:24]])[:-1]
 
 
-
+	# Guardian Class
 class NetGUARD(object):
 
 
@@ -64,7 +64,7 @@ class NetGUARD(object):
 	desc = "Defend host, give warnings to sysadmin and log to txt file."
 	version = "0.5"
 
-
+		# Initialize, create NetGUARD global variables and parse config file
 	def __init__(self):
 
 
@@ -93,7 +93,7 @@ class NetGUARD(object):
 			print "[!] Exception caught: ".format(e)
 			exit(0)
 
-			# My Network Interface MAC_Address
+			# My Network Interface MAC_Address 1ºAppear(line): 187
 		self.mymac = get_mymac(self.interface)
 
 			# My LAN IP Address
@@ -105,13 +105,28 @@ class NetGUARD(object):
 			# If someone is ARP spoofing
 		self.spoof_status = False
 
-			# SSH client attemps
+			# SSH client attempts
 		self.ssh_count = 0
 		self.ssh_brute = False
 
+			# MySQL client attempts
+		self.sql_count = 0
+		self.sql_brute = False
+
+			# FTP client attempts
+		self.ftp_count = 0
+		self.ftp_brute = False
+
 			# Time variables
-		self.t = ''
-		self.t1 = ''
+		#SSH
+		self.sst = ''
+		self.sst2 = ''
+		#SQL
+		self.sqt = ''
+		self.sqt2 = ''
+		#FTP
+		self.ftt = ''
+		self.ftt2 = ''
 
 		# Configuration file mapping
 	def configmap(self, section):
@@ -134,9 +149,9 @@ class NetGUARD(object):
 			# Ethernet Frame
 		if p.haslayer(Ether):
 				# Media Access Control destination
-			mac_dst = p[Ether].dst
+			mac_dst = str(p[Ether].dst)
 				# Media Acess Control source
-			mac_src = p[Ether].src
+			mac_src = str(p[Ether].src)
 
 
 			# ARP Layer Protection
@@ -201,10 +216,11 @@ class NetGUARD(object):
 						else:
 							return
 
+
                         # IP Layer Protection
                 if p.haslayer(IP):
-			ip_src = p[IP].src
-			ip_dst = p[IP].dst
+			ip_src = str(p[IP].src)
+			ip_dst = str(p[IP].dst)
 			ip_chk = p[IP].chksum
 			ip_len = p[IP].len
 
@@ -217,45 +233,119 @@ class NetGUARD(object):
 	                        seq = p[TCP].seq
 	                        preflag = [flags[x] for x in p.sprintf('%TCP.flags%')]
 	                        flag = "/".join(preflag)
-	                        chksum = p[TCP].chksum
+	                        chksum = str(p[TCP].chksum)
 	                        load = p[Raw].load
 
-				# SSH Protection
+					# FTP Protection
+				if sport == 21 and "530" in load:
+
+                                        if self.ftp_brute == False:
+                                                self.Jarvis.Say("The IP address {} tried to connect with the FTP server with a wrong password.".format(ip_dst))
+                                                self.log("IP - {}/MAC - {} tried to connect with the FTP server with a wrong password.".format(ip_dst,mac_dst))
+
+                                        self.ftp_count +=1
+
+                                        if self.ftp_count == 1:
+                                                        # Live minutes
+                                                self.ftt = datetime.now().strftime('%M')
+                                        else:
+                                                self.ftt2 = datetime.now().strftime('%M')
+
+                                                # If 4 ftp_client packets and 4º count time - 1º count time >= 1
+                                        if self.ftp_count >= 4 and int(self.ftt2) >= int(self.ftt):
+
+                                                interval = int(self.ftt2) - int(self.ftt)
+                                                if interval >= 20:
+                                                        self.ftp_count = 0
+                                                        self.ftt = 0
+                                                else:
+                                                        self.ftp_brute = True
+                                                        os.system("iptables -A INPUT -p tcp -s {} --dport {} -j REJECT".format(ip_dst,str(sport)))
+                                                        self.Jarvis.Say("The IP {} is brute forcing the FTP server.".format(ip_dst))
+                                                        self.Jarvis.Say("Raising the packet shield for the attacker")
+
+                                                                # Log
+                                                        self.log("! IP - {}/MAC - {} is brute forcing the FTP server.".format(ip_dst,mac_dst))
+                                                        self.log("Raising the packet shield for the attacker")
+
+                                                                # Status
+                                                        self.ftp_count = 0
+                                                        self.ftt = 0
+
+
+
+					# MySQL Protection
+				if sport == 3306 and "denied" in load:
+
+					if self.sql_brute == False:
+						self.Jarvis.Say("The IP address {} tried to connect with the SQL server with a wrong password.".format(ip_dst))
+						self.log("IP - {}/MAC - {} tried to connect with the SQL server with a wrong password.".format(ip_dst,mac_dst))
+
+                                        self.sql_count +=1
+
+                                        if self.sql_count == 1:
+                                                        # Live minutes
+                                                self.sqt = datetime.now().strftime('%M')
+                                        else:
+                                                self.sqt2 = datetime.now().strftime('%M')
+
+                                                # If 4 sql_client packets and 4º count time - 1º count time >= 1
+                                        if self.sql_count >= 4 and int(self.sqt2) >= int(self.sqt):
+
+                                                interval = int(self.sqt2) - int(self.sqt)
+                                                if interval >= 20:
+                                                        self.sql_count = 0
+                                                        self.sqt = 0
+                                                else:
+                                                        self.sql_brute = True
+                                                        os.system("iptables -A INPUT -p tcp -s {} --dport {} -j REJECT".format(ip_dst,str(sport)))
+                                                        self.Jarvis.Say("The IP {} is brute forcing the SQL server.".format(ip_dst))
+                                                        self.Jarvis.Say("Raising the packet shield for the attacker")
+
+                                                                # Log
+                                                        self.log("! IP - {}/MAC - {} is brute forcing the SQL server.".format(ip_dst,mac_dst))
+                                                        self.log("Raising the packet shield for the attacker")
+
+                                                                # Status
+                                                        self.sql_count = 0
+                                                        self.sqt = 0
+
+
+					# SSH Protection
 				if "SSH" in load and ip_src != self.myip:
 
 					if self.ssh_brute == False:
-						self.Jarvis.Say("Someone open a socket with the SSH server.")
-						self.log("Someone open a socket with the SSH server.")
+						self.Jarvis.Say("The IP address {} open a socket with the SQL server.".format(ip_src))
+						self.log("IP - {}/MAC - {} open a socket with the SQL server.".format(ip_src,mac_src))
 
 					self.ssh_count +=1
 
 					if self.ssh_count == 1:
 							# Live minutes
-						self.t = datetime.now().strftime('%M')
+						self.sst = datetime.now().strftime('%M')
 					else:
-						self.t2 = datetime.now().strftime('%M')
+						self.sst2 = datetime.now().strftime('%M')
 
 						# If 4 ssh_client packets and 4º count time - 1º count time >= 1
-					if self.ssh_count >= 4 and int(self.t2) >= int(self.t):
+					if self.ssh_count >= 4 and int(self.sst2) >= int(self.sst):
 
-						interval = int(self.t2) - int(self.t)
+						interval = int(self.sst2) - int(self.sst)
 						if interval >= 20:
 							self.ssh_count = 0
-							self.t = 0
+							self.sst = 0
 						else:
 							self.ssh_brute = True
-							ssh_src = str(ip_src)
-							os.system("iptables -A INPUT -p tcp -s {} --dport ssh -j REJECT".format(ip_src))
-							self.Jarvis.Say("The IP {} is brute forcing the SSH server.".format(ssh_src))
+							os.system("iptables -A INPUT -p tcp -s {} --dport {} -j REJECT".format(ip_src,str(dport)))
+							self.Jarvis.Say("The IP {} is brute forcing the SSH server.".format(ip_src))
 							self.Jarvis.Say("Raising the packet shield for the attacker")
 
 								# Log
-							self.log("Someone is brute forcing the SSH server.")
+							self.log("! IP - {}/MAC - {} is brute forcing the SSH server.".format(ip_src,mac_src))
 							self.log("Raising the packet shield for the attacker")
 							
 								# Status
 							self.ssh_count = 0
-							self.t = 0
+							self.sst = 0
 
 
 		# Logger

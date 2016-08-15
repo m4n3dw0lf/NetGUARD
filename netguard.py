@@ -20,7 +20,7 @@
 import os
 from core.NetGUARD import NetGUARD
 
-version = "0.5"
+version = "0.6"
 
 if os.geteuid() != 0:
 	sys.exit("[-] Should be run as root.")
