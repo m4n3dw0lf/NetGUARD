@@ -18,7 +18,7 @@ Defend host, give voice warnings to sysadmin and generate log files.<br />
 
 ## Basics
 
- - Finish NetGUARD with kill -2 to generate a .pcap file with traffic
+ - Finish NetGUARD with kill -2 to generate a .pcap file with network traffic intercepted by NetGUARD
 
   > example:
 
@@ -28,7 +28,7 @@ Defend host, give voice warnings to sysadmin and generate log files.<br />
 root      6654 ... python core/NetGUARD.py
                ...
 
-#kill -2 6654
+# kill -2 6654
 ```
 
 ## Current Features
