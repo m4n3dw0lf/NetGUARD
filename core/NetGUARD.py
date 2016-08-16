@@ -237,7 +237,7 @@ class NetGUARD(object):
 	                        load = p[Raw].load
 
 					# FTP Protection
-				if sport == 21 and "530" in load:
+				if sport == 21 and "530" in load and ip_src == self.myip:
 
                                         if self.ftp_brute == False:
                                                 self.Jarvis.Say("The IP address {} tried to connect with the FTP server with a wrong password.".format(ip_dst))
@@ -275,7 +275,7 @@ class NetGUARD(object):
 
 
 					# MySQL Protection
-				if sport == 3306 and "denied" in load:
+				if sport == 3306 and "denied" in load and ip_src == self.myip:
 
 					if self.sql_brute == False:
 						self.Jarvis.Say("The IP address {} tried to connect with the SQL server with a wrong password.".format(ip_dst))
@@ -312,11 +312,11 @@ class NetGUARD(object):
 
 
 					# SSH Protection
-				if "SSH" in load and ip_src != self.myip:
+				if "SSH" in load and ip_src != self.myip and ip_dst == self.myip:
 
 					if self.ssh_brute == False:
-						self.Jarvis.Say("The IP address {} open a socket with the SQL server.".format(ip_src))
-						self.log("IP - {}/MAC - {} open a socket with the SQL server.".format(ip_src,mac_src))
+						self.Jarvis.Say("The IP address {} open a socket with the SSH server.".format(ip_src))
+						self.log("IP - {}/MAC - {} open a socket with the SSH server.".format(ip_src,mac_src))
 
 					self.ssh_count +=1
 
@@ -327,7 +327,7 @@ class NetGUARD(object):
 						self.sst2 = datetime.now().strftime('%M')
 
 						# If 4 ssh_client packets and 4º count time - 1º count time >= 1
-					if self.ssh_count >= 4 and int(self.sst2) >= int(self.sst):
+					if self.ssh_count >= 3 and int(self.sst2) >= int(self.sst):
 
 						interval = int(self.sst2) - int(self.sst)
 						if interval >= 20:
@@ -342,7 +342,7 @@ class NetGUARD(object):
 								# Log
 							self.log("! IP - {}/MAC - {} is brute forcing the SSH server.".format(ip_src,mac_src))
 							self.log("Raising the packet shield for the attacker")
-							
+
 								# Status
 							self.ssh_count = 0
 							self.sst = 0
