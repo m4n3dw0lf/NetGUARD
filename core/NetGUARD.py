@@ -26,6 +26,7 @@ from scapy.all import *
 import os
 from jarvis import Jarvis
 from datetime import datetime
+import time
 
 	# background running
 import subprocess
@@ -62,7 +63,7 @@ class NetGUARD(object):
 
 	name = "Network Guardian"
 	desc = "Defend host, give warnings to sysadmin and log to txt file."
-	version = "0.5"
+	version = "0.7"
 
 		# Initialize, create NetGUARD global variables and parse config file
 	def __init__(self):
@@ -76,6 +77,7 @@ class NetGUARD(object):
 		self.Jarvis = Jarvis()
 
 			# Log file
+		os.path.abspath("log/NetGUARD.log")
 		self.file = open("log/NetGUARD.log","a+")
 
 		try:
@@ -105,6 +107,12 @@ class NetGUARD(object):
 			# If someone is ARP spoofing
 		self.spoof_status = False
 
+			# TCP != from gateway connections - DDoS avoid.
+		self.tcp_count = 0
+
+			# UDP != from gateway connections - DDoS avoid.
+		self.udp_count = 0
+
 			# SSH client attempts
 		self.ssh_count = 0
 		self.ssh_brute = False
@@ -118,15 +126,26 @@ class NetGUARD(object):
 		self.ftp_brute = False
 
 			# Time variables
+		self.start_time = time.time()
+		self.current_time = 0
+
+		#TCP
+		self.ttt = 0
+		self.ttt2 = 0
+
+		#UDP
+		self.utt = 0
+		self.utt2 = 0
+
 		#SSH
-		self.sst = ''
-		self.sst2 = ''
+		self.sst = 0
+		self.sst2 = 0
 		#SQL
-		self.sqt = ''
-		self.sqt2 = ''
+		self.sqt = 0
+		self.sqt2 = 0
 		#FTP
-		self.ftt = ''
-		self.ftt2 = ''
+		self.ftt = 0
+		self.ftt2 = 0
 
 		# Configuration file mapping
 	def configmap(self, section):
@@ -171,12 +190,12 @@ class NetGUARD(object):
 					# If gateway ARP is-at is normal
 				if protocol_src == self.gateway_ip and hardware_src == self.gateway_mac:
 					if self.spoof_status == True:
-						self.Jarvis.Say("The gateway has returned to the original MAC.")
-						self.log("Gateway returned to original MAC address.")
+						self.Jarvis.Say("The gateway has returned to the original mac.")
+						self.log("Gateway returned to original mac address.")
 						self.spoof_status = False
 					if self.myspoof_status == True:
 						self.Jarvis.Say("You stopped to arp spoof the gateway sir.")
-						self.log("This host stop to ARP spoof the gateway. \n")
+						self.log("This host stop to arp spoof the gateway. \n")
 						self.myspoof_status = False
 					return
 
@@ -191,7 +210,7 @@ class NetGUARD(object):
 							self.Jarvis.Say("You are arp spoofing the gateway sir.")
 
 								# Log
-							self.log("This host start to ARP spoof the gateway. \n")
+							self.log("This host start to arp spoof the gateway. \n")
 
 								# Status
 							self.myspoof_status = True
@@ -204,11 +223,12 @@ class NetGUARD(object):
 						if self.spoof_status == False:
 
 							for i in range(0,3):
-								self.Jarvis.Say("Someone is trying to ARP spoof the network.")
+								self.Jarvis.Say("the mac {} is trying to arp spoof the network.".format(hardware_src.replace(":"," ")))
+								#os.system("iptables -A INPUT -m mac --mac-source {} -j REJECT".format(hardware_src))
 								time.sleep(2)
 
 								# Log
-							self.log("{} are trying to ARP spoof the gateway. \n".format(hardware_src))
+							self.log("{} are trying to arp spoof the network. \n".format(hardware_src))
 
 								# Status
 							self.spoof_status = True
@@ -224,7 +244,62 @@ class NetGUARD(object):
 			ip_chk = p[IP].chksum
 			ip_len = p[IP].len
 
-				# TCP Layer Protection
+				# DDoS TCP Layer Protection
+			if p.haslayer(TCP):
+	                        sport = p[TCP].sport
+				if ip_src != self.gateway_ip and ip_src != self.myip and ip_dst == self.myip:
+					self.tcp_count += 1
+
+				if self.tcp_count == 1:
+				        self.ttt = time.time()
+                                else:
+                                	self.ttt2 = time.time()
+
+				if self.tcp_count > 500:
+
+                                        self.Jarvis.Say("The IP address {} is performing a TCP denial of service attack against this host.".format(ip_src.replace("."," ")))
+                                        self.log("IP - {}/MAC - {} start to perform a TCP denial of service attack against this host.".format(ip_src,mac_dst))
+                                        os.system("iptables -A INPUT -p tcp -s {} --sport {} -j REJECT".format(ip_src,str(sport)))
+                                        os.system("iptables -A INPUT -p tcp -s {} --sport {} -j DROP".format(ip_src,str(sport)))
+                                        self.Jarvis.Say("Raising the packet shield for the attacker")
+					self.log("Raising the packet shield for the attacker")
+					self.tcp_count = 0
+
+				interval = self.ttt2 - self.ttt
+                                if interval >= 15:
+					self.tcp_count = 0
+
+
+                                # DDoS TCP Layer Protection
+                        if p.haslayer(UDP):
+                                sport = p[UDP].sport
+
+                                if ip_src != self.gateway_ip and ip_src != self.myip and ip_dst == self.myip:
+                                        self.udp_count += 1
+
+                                if self.tcp_count == 1:
+                                        self.utt = time.time()
+                                else:
+                                        self.utt2 = time.time()
+
+                                if self.udp_count > 500:
+
+                                        self.Jarvis.Say("The IP address {} is performing a UDP denial of service attack against this host.".format(ip_src.replace("."," ")))
+                                        self.log("IP - {}/MAC - {} start to perform a UDP denial of service attack against this host.".format(ip_src,mac_dst))
+                                        os.system("iptables -A INPUT -p udp -s {} --sport {} -j REJECT".format(ip_src,str(sport)))
+                                        os.system("iptables -A INPUT -p udp -s {} --sport {} -j DROP".format(ip_src,str(sport)))
+                                        self.Jarvis.Say("Raising the packet shield for the attacker")
+                                        self.log("Raising the packet shield for the attacker")
+                                        self.udp_count = 0
+
+                                interval = self.utt2 - self.utt
+                                if interval >= 15:
+                                	self.tcp_count = 0
+
+
+
+
+				# Brute-Force TCP Layer Protection
 			if p.haslayer(TCP) and p.haslayer(Raw):
 	                	flags = {'F':'FIN','S':'SYN','R':'RST','P':'PSH','A':'ACK','U':'URG','E':'ECE','C':'CWR'}
 	                        dport = p[TCP].dport
@@ -240,28 +315,27 @@ class NetGUARD(object):
 				if sport == 21 and "530" in load and ip_src == self.myip:
 
                                         if self.ftp_brute == False:
-                                                self.Jarvis.Say("The IP address {} tried to connect with the FTP server with a wrong password.".format(ip_dst))
+                                                self.Jarvis.Say("The IP address {} tried to connect with the FTP server with a wrong password.".format(ip_dst.replace("."," ")))
                                                 self.log("IP - {}/MAC - {} tried to connect with the FTP server with a wrong password.".format(ip_dst,mac_dst))
 
                                         self.ftp_count +=1
 
                                         if self.ftp_count == 1:
                                                         # Live minutes
-                                                self.ftt = datetime.now().strftime('%M')
+                                                self.ftt = time.time()
                                         else:
-                                                self.ftt2 = datetime.now().strftime('%M')
+                                                self.ftt2 = time.time()
 
                                                 # If 4 ftp_client packets and 4º count time - 1º count time >= 1
-                                        if self.ftp_count >= 4 and int(self.ftt2) >= int(self.ftt):
+                                        if self.ftp_count >= 4:
 
-                                                interval = int(self.ftt2) - int(self.ftt)
-                                                if interval >= 20:
+                                                interval = self.ftt2 - self.ftt
+                                                if interval >= 400:
                                                         self.ftp_count = 0
-                                                        self.ftt = 0
                                                 else:
                                                         self.ftp_brute = True
                                                         os.system("iptables -A INPUT -p tcp -s {} --dport {} -j REJECT".format(ip_dst,str(sport)))
-                                                        self.Jarvis.Say("The IP {} is brute forcing the FTP server.".format(ip_dst))
+                                                        self.Jarvis.Say("The IP {} is brute forcing the FTP server.".format(ip_dst.replace("."," ")))
                                                         self.Jarvis.Say("Raising the packet shield for the attacker")
 
                                                                 # Log
@@ -270,7 +344,6 @@ class NetGUARD(object):
 
                                                                 # Status
                                                         self.ftp_count = 0
-                                                        self.ftt = 0
 
 
 
@@ -278,28 +351,27 @@ class NetGUARD(object):
 				if sport == 3306 and "denied" in load and ip_src == self.myip:
 
 					if self.sql_brute == False:
-						self.Jarvis.Say("The IP address {} tried to connect with the SQL server with a wrong password.".format(ip_dst))
+						self.Jarvis.Say("The IP address {} tried to connect with the SQL server with a wrong password.".format(ip_dst.replace("."," ")))
 						self.log("IP - {}/MAC - {} tried to connect with the SQL server with a wrong password.".format(ip_dst,mac_dst))
 
                                         self.sql_count +=1
 
                                         if self.sql_count == 1:
                                                         # Live minutes
-                                                self.sqt = datetime.now().strftime('%M')
+                                                self.sqt = time.time()
                                         else:
-                                                self.sqt2 = datetime.now().strftime('%M')
+                                                self.sqt2 = time.time()
 
                                                 # If 4 sql_client packets and 4º count time - 1º count time >= 1
-                                        if self.sql_count >= 4 and int(self.sqt2) >= int(self.sqt):
+                                        if self.sql_count >= 4:
 
-                                                interval = int(self.sqt2) - int(self.sqt)
-                                                if interval >= 20:
+                                                interval = self.sqt2 - self.sqt
+                                                if interval >= 400:
                                                         self.sql_count = 0
-                                                        self.sqt = 0
                                                 else:
                                                         self.sql_brute = True
                                                         os.system("iptables -A INPUT -p tcp -s {} --dport {} -j REJECT".format(ip_dst,str(sport)))
-                                                        self.Jarvis.Say("The IP {} is brute forcing the SQL server.".format(ip_dst))
+                                                        self.Jarvis.Say("The IP {} is brute forcing the SQL server.".format(ip_dst.replace("."," ")))
                                                         self.Jarvis.Say("Raising the packet shield for the attacker")
 
                                                                 # Log
@@ -308,35 +380,34 @@ class NetGUARD(object):
 
                                                                 # Status
                                                         self.sql_count = 0
-                                                        self.sqt = 0
 
 
 					# SSH Protection
 				if "SSH" in load and ip_src != self.myip and ip_dst == self.myip:
 
 					if self.ssh_brute == False:
-						self.Jarvis.Say("The IP address {} open a socket with the SSH server.".format(ip_src))
+						self.Jarvis.Say("The IP address {} open a socket with the SSH server.".format(ip_dst.replace("."," ")))
 						self.log("IP - {}/MAC - {} open a socket with the SSH server.".format(ip_src,mac_src))
 
 					self.ssh_count +=1
 
 					if self.ssh_count == 1:
 							# Live minutes
-						self.sst = datetime.now().strftime('%M')
+						self.sst = time.time()
 					else:
-						self.sst2 = datetime.now().strftime('%M')
+						self.sst2 = time.time()
 
 						# If 4 ssh_client packets and 4º count time - 1º count time >= 1
-					if self.ssh_count >= 3 and int(self.sst2) >= int(self.sst):
+					if self.ssh_count >= 3:
 
-						interval = int(self.sst2) - int(self.sst)
-						if interval >= 20:
+						interval = self.sst2 - self.sst
+						if interval >= 400:
 							self.ssh_count = 0
 							self.sst = 0
 						else:
 							self.ssh_brute = True
 							os.system("iptables -A INPUT -p tcp -s {} --dport {} -j REJECT".format(ip_src,str(dport)))
-							self.Jarvis.Say("The IP {} is brute forcing the SSH server.".format(ip_src))
+							self.Jarvis.Say("The IP {} is brute forcing the SSH server.".format(ip_dst.replace("."," ")))
 							self.Jarvis.Say("Raising the packet shield for the attacker")
 
 								# Log
@@ -373,13 +444,15 @@ class NetGUARD(object):
 
 				# Start the sniffer.
 			p = sniff(iface=self.interface, prn = self.main)
-                        time = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
-                        wrpcap("NetGUARD_{}.pcap".format(time),p)
+	                time = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+	                wrpcap("NetGUARD_{}.pcap".format(time),p)
 
-		except Exception as e:
-			self.Jarvis.Say("Problem starting the network monitor")
-			self.log("Problem starting the network monitor")
-			self.log("Exception: {}".format(e))
+		except KeyboardInterrupt:
+			pass
+		#except Exception as e:
+		#	self.Jarvis.Say("Problem starting the network monitor")
+		#	self.log("Problem starting the network monitor")
+		#	self.log("Exception: {}".format(e))
 
 
 		# Start the sniffer as subprocess.
