@@ -281,7 +281,7 @@ class NetGUARD(object):
 						self.jail.append(ip)
 
 				interval = self.ttt2 - self.ttt
-                                if interval >= 10:
+                                if interval >= 5:
 					self.tcp_count = 0
 					self.tcpsenders.clear()
 
@@ -310,7 +310,7 @@ class NetGUARD(object):
 						self.jail.append(ip)
 
                                 interval = self.utt2 - self.utt
-                                if interval >= 10:
+                                if interval >= 5:
                                 	self.udp_count = 0
 					self.udpsenders.clear()
 
