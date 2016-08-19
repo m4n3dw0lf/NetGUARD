@@ -1,5 +1,5 @@
 # NetGUARD
-Network Guardian v0.7 <br/>
+Network Guardian v0.8 <br/>
 
 Defend host, give voice warnings to sysadmin and generate log files.<br />
 
@@ -64,4 +64,3 @@ root      6654 ... python core/NetGUARD.py
 
   - Scanners warnings and protections.
   - Warnings about host running NetGUARD brute-forcing.
-  - Maybe a counter-attack "suck th4t beatch!".
