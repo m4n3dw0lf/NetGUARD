@@ -1,5 +1,5 @@
 # NetGUARD
-Network Guardian v0.8 <br/>
+Network Guardian v0.9 <br/>
 
 Defend host, give voice warnings to sysadmin and generate log files.<br />
 
@@ -36,8 +36,8 @@ root      6654 ... python core/NetGUARD.py
 
 ### Denial Of Service Protection
 
-  - Block connections from host after a TCP/UDP flood attack is detected.   (Guardian)
-  - Report if someone is performing a TCP/UDP flood DoS.	            (Monitor)
+  - Block connections from host after a TCP/UDP/ICMP flood attack is detected.   (Guardian)
+  - Report if someone is performing a TCP/UDP/ICMP flood DoS.	                 (Monitor)
 
 ### ARP Protection
   

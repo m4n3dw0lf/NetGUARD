@@ -42,20 +42,25 @@ import ConfigParser
 
 	# Function to get given interface IP address
 def get_myip(interface):
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        return socket.inet_ntoa(fcntl.ioctl(
-        	s.fileno(),
-                0x8915,
-                struct.pack('256s', interface[:15])
-        )[20:24])
-
-
+	try:
+        	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        	return socket.inet_ntoa(fcntl.ioctl(
+        		s.fileno(),
+        	        0x8915,
+        	        struct.pack('256s', interface[:15])
+        	)[20:24])
+	except:
+		print "[!] Set a valid interface on the configuration file."
+		exit(0)
         # Function to get given interface MAC address
 def get_mymac(interface):
-	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        info = fcntl.ioctl(s.fileno(), 0x8927,  struct.pack('256s', interface[:15]))
-        return ''.join(['%02x:' % ord(char) for char in info[18:24]])[:-1]
-
+	try:
+		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        	info = fcntl.ioctl(s.fileno(), 0x8927,  struct.pack('256s', interface[:15]))
+        	return ''.join(['%02x:' % ord(char) for char in info[18:24]])[:-1]
+	except:
+		print "[!] Set a valid interface on the configuration file."
+		exit(0)
 
 	# Guardian Class
 class NetGUARD(object):
@@ -110,14 +115,20 @@ class NetGUARD(object):
 			# If someone is ARP spoofing status
 		self.spoof_status = False
 
+			# ICMP request for this host - DDoS avoid.
+		self.icmp_count = 0
+			# Network ICMP sources in 5s
+		self.icmpsenders = {}
+
+
 			# TCP != from gateway connections - DDoS avoid.
 		self.tcp_count = 0
-			# Network UDP sources in 10s
+			# Network UDP sources in 5s
 		self.tcpsenders = {}
 
 			# UDP != from gateway connections - DDoS avoid.
 		self.udp_count = 0
-			# Network UDP sources in 10s
+			# Network UDP sources in 5s
 		self.udpsenders = {}
 
 			# SSH client attempts and brute status
@@ -135,6 +146,10 @@ class NetGUARD(object):
 			# Time variables
 		self.start_time = time.time()
 		self.current_time = 0
+
+		#ICMP time auxiliary
+		self.itt = 0
+		self.itt2 = 0
 
 		#TCP time auxiliary
 		self.ttt = 0
@@ -253,6 +268,35 @@ class NetGUARD(object):
 			ip_chk = p[IP].chksum
 			ip_len = p[IP].len
 
+				#DDoS ICMP Layer Protection
+			if p.haslayer(ICMP):
+				type = p[ICMP].type
+				if ip_src != self.myip and ip_dst == self.myip and type == 8:
+					if ip_dst not in self.icmpsenders:
+							# Append new ICMP sender on network
+						self.icmpsenders.update({ip_src: self.tcp_count})
+					self.icmp_count += 1
+
+					# First time value from 5s delay
+				if self.icmp_count == 1:
+					self.itt = time.time()
+				else:
+					self.itt2 = time.time()
+
+				for ip,count in self.icmpsenders.iteritems():
+
+					if count > 500 and ip not in self.jail:
+						self.Jarvis.Say("The IP address {} is performing a ICMP denial of service attack against this host.".format(ip.replace("."," ")))
+						self.log("IP - {}/MAC - {} start to perform a ICMP denial of service attack against this host.".format(ip,mac_dst))
+						os.system("iptables -A INPUT -p icmp -s {} -j DROP".format(ip,str(dport)))
+						self.Jarvis.Say("Raising the packet shield for the attacker")
+						self.jail.append(ip)
+
+				interval = self.itt2 - self.itt
+				if interval >= 5:
+					self.icmp_count = 0
+					self.icmpsenders.clear()
+
 				# DDoS TCP Layer Protection
 			if p.haslayer(TCP):
 	                        sport = p[TCP].sport
@@ -263,11 +307,11 @@ class NetGUARD(object):
 						self.tcpsenders.update({ip_src: self.tcp_count})
 					self.tcp_count += 1
 
-					# First time value from 10s delay
+					# First time value from 5s delay
 				if self.tcp_count == 1:
 				        self.ttt = time.time()
                                 else:
-						# Other time values from 10s delay
+						# Other time values from 5s delay
                                 	self.ttt2 = time.time()
 
 				for ip,count in self.tcpsenders.iteritems():
