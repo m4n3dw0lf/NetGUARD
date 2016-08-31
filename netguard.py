@@ -17,17 +17,39 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
 # USA
 
-import os
+import os,sys
 from core.NetGUARD import NetGUARD
 
-version = "0.9"
 
+path = os.path.abspath(os.path.dirname(sys.argv[0]))
+netguard = NetGUARD()
+
+version = "1.0"
 if os.geteuid() != 0:
 	sys.exit("[-] Should be run as root.")
 
+
+def print_help(version):
+	print " [*] NetGUARD v{}".format(version)
+	print
+	print " --verbose || -v           Start NetGUARD verbosely."
+	print " --stop || -s		  Stop NetGUARD."
+	print " --help || -h		  Print this help message."
+
+
 if __name__ == "__main__":
-	netguard = NetGUARD()
 	try:
+		if sys.argv[1] == "--verbose" or sys.argv[1] == "-v":
+			netguard.backgroundstart()
+			os.system("tail -f {}/log/NetGUARD.log".format(path))
+		elif sys.argv[1] == "--stop" or sys.argv[1] == "-s":
+				# KILL SIGINT 'CTRL + C' to generate pcap
+			os.system("killall python -s 2")
+		elif sys.argv[1] == "--help" or sys.argv[1] == "-h":
+			print_help(version)
+
+	except IndexError:
 		netguard.backgroundstart()
+
 	except Exception as e:
 		print "[!] Exception caught: {}".format(e)

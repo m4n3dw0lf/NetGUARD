@@ -1,5 +1,5 @@
 # NetGUARD
-Network Guardian v0.9 <br/>
+Network Guardian v1.0 <br/>
 
 Defend host, give voice warnings to sysadmin and generate log files.<br />
 
@@ -18,17 +18,12 @@ Defend host, give voice warnings to sysadmin and generate log files.<br />
 
 ## Basics
 
- - Finish NetGUARD with kill -2 to generate a .pcap file with network traffic intercepted by NetGUARD
-
-  > example:
+  > examples:
 
 ```
-# ps -aux | grep NetGUARD
-               ...
-root      6654 ... python core/NetGUARD.py
-               ...
-
-# kill -2 6654
+ ./netguard.py --verbose or -v           Start NetGUARD verbosely.
+ ./netguard.py --stop or -s              Stop NetGUARD.
+ ./netguard.py --help or -h              Print this help message.
 ```
 
 ## Current Features

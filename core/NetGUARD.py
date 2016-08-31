@@ -68,7 +68,7 @@ class NetGUARD(object):
 
 	name = "Network Guardian"
 	desc = "Defend host, give warnings to sysadmin and log to txt file."
-	version = "0.8"
+	version = "0.9"
 
 		# Initialize, create NetGUARD global variables and parse config file
 	def __init__(self):
@@ -214,12 +214,12 @@ class NetGUARD(object):
 					# If gateway ARP is-at is normal
 				if protocol_src == self.gateway_ip and hardware_src == self.gateway_mac:
 					if self.spoof_status == True:
-						self.Jarvis.Say("The gateway has returned to the original mac.")
 						self.log("Gateway returned to original mac address.")
+						self.Jarvis.Say("The gateway has returned to the original mac.")
 						self.spoof_status = False
 					if self.myspoof_status == True:
-						self.Jarvis.Say("You stopped to arp spoof the gateway sir.")
 						self.log("This host stop to arp spoof the gateway. \n")
+						self.Jarvis.Say("You stopped to arp spoof the gateway sir.")
 						self.myspoof_status = False
 					return
 
@@ -231,10 +231,10 @@ class NetGUARD(object):
 
 
 						if self.myspoof_status == False:
-							self.Jarvis.Say("You are arp spoofing the gateway sir.")
-
 								# Log
 							self.log("This host start to arp spoof the gateway. \n")
+
+							self.Jarvis.Say("You are arp spoofing the gateway sir.")
 
 								# Status
 							self.myspoof_status = True
@@ -253,6 +253,7 @@ class NetGUARD(object):
 
 								# Log
 							self.log("{} are trying to arp spoof the network. \n".format(hardware_src))
+
 
 								# Status
 							self.spoof_status = True
@@ -286,8 +287,8 @@ class NetGUARD(object):
 				for ip,count in self.icmpsenders.iteritems():
 
 					if count > 500 and ip not in self.jail:
-						self.Jarvis.Say("The IP address {} is performing a ICMP denial of service attack against this host.".format(ip.replace("."," ")))
 						self.log("IP - {}/MAC - {} start to perform a ICMP denial of service attack against this host.".format(ip,mac_dst))
+						self.Jarvis.Say("The IP address {} is performing a ICMP denial of service attack against this host.".format(ip.replace("."," ")))
 						os.system("iptables -A INPUT -p icmp -s {} -j DROP".format(ip,str(dport)))
 						self.Jarvis.Say("Raising the packet shield for the attacker")
 						self.jail.append(ip)
@@ -317,11 +318,11 @@ class NetGUARD(object):
 				for ip,count in self.tcpsenders.iteritems():
 
 					if count > 500 and ip not in self.jail:
-        	                                self.Jarvis.Say("The IP address {} is performing a TCP denial of service attack against this host.".format(ip.replace("."," ")))
                		                        self.log("IP - {}/MAC - {} start to perform a TCP denial of service attack against this host.".format(ip,mac_dst))
+        	                                self.Jarvis.Say("The IP address {} is performing a TCP denial of service attack against this host.".format(ip.replace("."," ")))
                                         	os.system("iptables -A INPUT -p tcp -s {} -j DROP".format(ip,str(dport)))
-                                        	self.Jarvis.Say("Raising the packet shield for the attacker")
 						self.log("Raising the packet shield for the attacker")
+                                        	self.Jarvis.Say("Raising the packet shield for the attacker")
 						self.jail.append(ip)
 
 				interval = self.ttt2 - self.ttt
@@ -346,11 +347,11 @@ class NetGUARD(object):
 				for ip,count in self.udpsenders.iteritems():
 
                                 	if count > 500 and ip not in self.jail:
-                                        	self.Jarvis.Say("The IP address {} is performing a UDP denial of service attack against this host.".format(ip_src.replace("."," ")))
                                         	self.log("IP - {}/MAC - {} start to perform a UDP denial of service attack against this host.".format(ip_src,mac_dst))
+                                        	self.Jarvis.Say("The IP address {} is performing a UDP denial of service attack against this host.".format(ip_src.replace("."," ")))
                                         	os.system("iptables -A INPUT -p udp -s {} -j DROP".format(ip_src,str(dport)))
-                                        	self.Jarvis.Say("Raising the packet shield for the attacker")
                                         	self.log("Raising the packet shield for the attacker")
+                                        	self.Jarvis.Say("Raising the packet shield for the attacker")
 						self.jail.append(ip)
 
                                 interval = self.utt2 - self.utt
@@ -377,8 +378,8 @@ class NetGUARD(object):
 				if sport == 21 and "530" in load and ip_src == self.myip:
 
                                         if self.ftp_brute == False:
-                                                self.Jarvis.Say("The IP address {} tried to connect with the FTP server with a wrong password.".format(ip_dst.replace("."," ")))
                                                 self.log("IP - {}/MAC - {} tried to connect with the FTP server with a wrong password.".format(ip_dst,mac_dst))
+                                                self.Jarvis.Say("The IP address {} tried to connect with the FTP server with a wrong password.".format(ip_dst.replace("."," ")))
 
                                         self.ftp_count +=1
 
@@ -397,12 +398,13 @@ class NetGUARD(object):
                                                 else:
                                                         self.ftp_brute = True
                                                         os.system("iptables -A INPUT -p tcp -s {} --dport {} -j REJECT".format(ip_dst,str(sport)))
-                                                        self.Jarvis.Say("The IP {} is brute forcing the FTP server.".format(ip_dst.replace("."," ")))
-                                                        self.Jarvis.Say("Raising the packet shield for the attacker")
-
                                                                 # Log
                                                         self.log("! IP - {}/MAC - {} is brute forcing the FTP server.".format(ip_dst,mac_dst))
                                                         self.log("Raising the packet shield for the attacker")
+
+                                                        self.Jarvis.Say("The IP {} is brute forcing the FTP server.".format(ip_dst.replace("."," ")))
+                                                        self.Jarvis.Say("Raising the packet shield for the attacker")
+
 
                                                                 # Status
                                                         self.ftp_count = 0
@@ -413,8 +415,8 @@ class NetGUARD(object):
 				if sport == 3306 and "denied" in load and ip_src == self.myip:
 
 					if self.sql_brute == False:
-						self.Jarvis.Say("The IP address {} tried to connect with the SQL server with a wrong password.".format(ip_dst.replace("."," ")))
 						self.log("IP - {}/MAC - {} tried to connect with the SQL server with a wrong password.".format(ip_dst,mac_dst))
+						self.Jarvis.Say("The IP address {} tried to connect with the SQL server with a wrong password.".format(ip_dst.replace("."," ")))
 
                                         self.sql_count +=1
 
@@ -433,12 +435,12 @@ class NetGUARD(object):
                                                 else:
                                                         self.sql_brute = True
                                                         os.system("iptables -A INPUT -p tcp -s {} --dport {} -j REJECT".format(ip_dst,str(sport)))
-                                                        self.Jarvis.Say("The IP {} is brute forcing the SQL server.".format(ip_dst.replace("."," ")))
-                                                        self.Jarvis.Say("Raising the packet shield for the attacker")
-
                                                                 # Log
                                                         self.log("! IP - {}/MAC - {} is brute forcing the SQL server.".format(ip_dst,mac_dst))
                                                         self.log("Raising the packet shield for the attacker")
+
+                                                        self.Jarvis.Say("The IP {} is brute forcing the SQL server.".format(ip_dst.replace("."," ")))
+                                                        self.Jarvis.Say("Raising the packet shield for the attacker")
 
                                                                 # Status
                                                         self.sql_count = 0
@@ -448,8 +450,8 @@ class NetGUARD(object):
 				if "SSH" in load and ip_src != self.myip and ip_dst == self.myip:
 
 					if self.ssh_brute == False:
-						self.Jarvis.Say("The IP address {} open a socket with the SSH server.".format(ip_dst.replace("."," ")))
 						self.log("IP - {}/MAC - {} open a socket with the SSH server.".format(ip_src,mac_src))
+						self.Jarvis.Say("The IP address {} open a socket with the SSH server.".format(ip_dst.replace("."," ")))
 
 					self.ssh_count +=1
 
@@ -469,12 +471,12 @@ class NetGUARD(object):
 						else:
 							self.ssh_brute = True
 							os.system("iptables -A INPUT -p tcp -s {} --dport {} -j REJECT".format(ip_src,str(dport)))
-							self.Jarvis.Say("The IP {} is brute forcing the SSH server.".format(ip_dst.replace("."," ")))
-							self.Jarvis.Say("Raising the packet shield for the attacker")
-
 								# Log
 							self.log("! IP - {}/MAC - {} is brute forcing the SSH server.".format(ip_src,mac_src))
 							self.log("Raising the packet shield for the attacker")
+
+							self.Jarvis.Say("The IP {} is brute forcing the SSH server.".format(ip_dst.replace("."," ")))
+							self.Jarvis.Say("Raising the packet shield for the attacker")
 
 								# Status
 							self.ssh_count = 0
@@ -496,13 +498,13 @@ class NetGUARD(object):
 	def start(self):
 		try:
 			pid = os.getpid()
-			self.Jarvis.Say("Network guardian initialized on process {}.".format(pid))
 			self.log("NetGUARD started")
+			self.Jarvis.Say("Network guardian initialized on process {}.".format(pid))
 
 				# Set static ARP with the gateway.
-			self.Jarvis.Say("Setting static arp with gateway.")
 			os.system("arp -s {} {}".format(self.gateway_ip, self.gateway_mac))
 			self.log("Static ARP set with gateway.")
+			self.Jarvis.Say("Setting static arp with gateway.")
 
 			self.Jarvis.Say("I will warn you if i find any threat")
 
@@ -513,9 +515,9 @@ class NetGUARD(object):
 	                wrpcap("NetGUARD_{}.pcap".format(time),p)
 
 		except Exception as e:
-			self.Jarvis.Say("Problem starting the network monitor")
 			self.log("Problem starting the network monitor")
 			self.log("Exception: {}".format(e))
+			self.Jarvis.Say("Problem starting the network monitor")
 
 
 		# Start the sniffer as subprocess.
@@ -526,8 +528,8 @@ class NetGUARD(object):
 			self.log("NetGUARD in background started.")
 			return
 		except Exception as e:
-			self.Jarvis.Say("Problem starting the network monitor in background")
 			self.log("Problem starting NetGUARD in background")
+			self.Jarvis.Say("Problem starting the network monitor in background")
 
 
 if __name__ == "__main__":
