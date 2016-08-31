@@ -12,9 +12,7 @@ Defend host, give voice warnings to sysadmin and generate log files.<br />
  - git clone https://github.com/m4n3dw0lf/NetGUARD
  - cd NetGUARD && pip install -r requirements.txt
  - nano config/netguard.cfg (Configure required settings)
- - ./netguard.py
-
-  > NetGUARD will give voice warnings or you can check log at: log/NetGUARD.log
+ - ./netguard.py -h
 
 ## Basics
 
