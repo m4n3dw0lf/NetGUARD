@@ -40,7 +40,7 @@ class Jarvis(object):
 		self.rec = sr.Recognizer()
 		self.engine = pyttsx.init()
 		self.rate = self.engine.getProperty('rate')
-		self.engine.setProperty('rate', self.rate-60)
+		self.engine.setProperty('rate', self.rate-45)
 		self.voices = self.engine.getProperty('voices')
 		self.engine.setProperty('voice',self.voices[16].id) #1,9,10,11,16,22,25
 		self.ser = serial.Serial()

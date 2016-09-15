@@ -1,5 +1,5 @@
 # NetGUARD
-Network Guardian v1.0 <br/>
+Network Guardian v1.1 <br/>
 
 Defend host, give voice warnings to sysadmin and generate log files.<br />
 
@@ -19,8 +19,9 @@ Defend host, give voice warnings to sysadmin and generate log files.<br />
   > examples:
 
 ```
+ ./netguard.py 				 Start NetGUARD as subprocess
  ./netguard.py --verbose or -v           Start NetGUARD verbosely.
- ./netguard.py --stop or -s              Stop NetGUARD.
+ ./netguard.py --stop or -s              Stop NetGUARD subprocess.
  ./netguard.py --help or -h              Print this help message.
 ```
 
@@ -55,5 +56,6 @@ Defend host, give voice warnings to sysadmin and generate log files.<br />
 
 ## Coming soon
 
+  - POST flood protection.
   - Scanners warnings and protections.
   - Warnings about host running NetGUARD brute-forcing.

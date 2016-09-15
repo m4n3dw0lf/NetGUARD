@@ -24,7 +24,7 @@ from core.NetGUARD import NetGUARD
 path = os.path.abspath(os.path.dirname(sys.argv[0]))
 netguard = NetGUARD()
 
-version = "1.0"
+version = "1.1"
 if os.geteuid() != 0:
 	sys.exit("[-] Should be run as root.")
 
@@ -44,6 +44,7 @@ if __name__ == "__main__":
 			os.system("tail -f {}/log/NetGUARD.log".format(path))
 		elif sys.argv[1] == "--stop" or sys.argv[1] == "-s":
 				# KILL SIGINT 'CTRL + C' to generate pcap
+			print "[!] NetGUARD finalized."
 			os.system("killall python -s 2")
 		elif sys.argv[1] == "--help" or sys.argv[1] == "-h":
 			print_help(version)
