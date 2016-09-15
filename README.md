@@ -19,7 +19,7 @@ Defend host, give voice warnings to sysadmin and generate log files.<br />
   > examples:
 
 ```
- ./netguard.py 				 Start NetGUARD as subprocess
+ ./netguard.py 				                      Start NetGUARD as subprocess
  ./netguard.py --verbose or -v           Start NetGUARD verbosely.
  ./netguard.py --stop or -s              Stop NetGUARD subprocess.
  ./netguard.py --help or -h              Print this help message.
