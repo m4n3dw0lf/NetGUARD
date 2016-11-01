@@ -32,9 +32,9 @@ if os.geteuid() != 0:
 def print_help(version):
 	print " [*] NetGUARD v{}".format(version)
 	print
-	print " --verbose || -v           Start NetGUARD verbosely."
-	print " --stop || -s		  Stop NetGUARD."
-	print " --help || -h		  Print this help message."
+	print " --verbose or -v           Start NetGUARD verbosely."
+	print " --stop or -s		  Stop NetGUARD."
+	print " --help or -h		  Print this help message."
 
 
 if __name__ == "__main__":
