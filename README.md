@@ -57,5 +57,3 @@ Defend host, give voice warnings to sysadmin and generate log files.<br />
 ## Coming soon
 
   - POST flood protection.
-  - Scanners warnings and protections.
-  - Warnings about host running NetGUARD brute-forcing.
