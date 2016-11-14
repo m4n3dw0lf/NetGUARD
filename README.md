@@ -53,7 +53,3 @@ Defend host, give voice warnings to sysadmin and generate log files.<br />
 
   - Block MySQL connections from IP after multiple failed attempts.         (Guardian)
   - Report if someone enter a wrong password in the MySQL server.           (Monitor)
-
-## Coming soon
-
-  - POST flood protection.
