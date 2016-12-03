@@ -21,7 +21,7 @@
 
 import serial
 import pyttsx
-import speech_recognition as sr
+#import speech_recognition as sr
 import serial.tools.list_ports
 import praw
 import sqlite3
@@ -37,10 +37,10 @@ class Jarvis(object):
 		self.numbers = []
 		self.con = None  # example sqlite3.connect('config/database.db');
 		self.serialport = self.arduino_check()
-		self.rec = sr.Recognizer()
+		self.rec = None #sr.Recognizer()
 		self.engine = pyttsx.init()
 		self.rate = self.engine.getProperty('rate')
-		self.engine.setProperty('rate', self.rate-45)
+		self.engine.setProperty('rate', self.rate-65)
 		self.voices = self.engine.getProperty('voices')
 		self.engine.setProperty('voice',self.voices[16].id) #1,9,10,11,16,22,25
 		self.ser = serial.Serial()
@@ -95,7 +95,6 @@ class Jarvis(object):
 				port = self.array[nport]
 				return port
 			else:
-				print "[!] Arduino Leonardo not found."
 				pass
 		else:
 			pass

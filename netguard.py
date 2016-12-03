@@ -24,7 +24,7 @@ from core.NetGUARD import NetGUARD
 path = os.path.abspath(os.path.dirname(sys.argv[0]))
 netguard = NetGUARD()
 
-version = "1.1"
+version = "1.2"
 if os.geteuid() != 0:
 	sys.exit("[-] Should be run as root.")
 

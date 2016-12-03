@@ -1,5 +1,5 @@
 # NetGUARD
-Network Guardian v1.1 <br/>
+Network Guardian v1.2 <br/>
 
 Defend host, give voice warnings to sysadmin and generate log files.<br />
 
@@ -38,6 +38,11 @@ Defend host, give voice warnings to sysadmin and generate log files.<br />
   - Set static ARP with your gateway.                                       (Guardian)
   - Report if someone is ARP spoofing the gateway.                          (Monitor)
   - Report if you are ARP spoofing the gateway.                             (Monitor)
+
+### DHCP Protection
+
+  - Protect against DHCP Acknowledgement injection			    (Guardian)
+  - Reports about DHCP discovers, requests, acknowledgements		    (Monitor)
 
 ### SSH Protection
 
